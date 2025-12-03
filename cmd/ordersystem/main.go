@@ -10,10 +10,12 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/mvr-garcia/go-clean-arch/configs"
 	"github.com/mvr-garcia/go-clean-arch/internal/event/handler"
+	"github.com/mvr-garcia/go-clean-arch/internal/infra/database"
 	"github.com/mvr-garcia/go-clean-arch/internal/infra/graph"
 	"github.com/mvr-garcia/go-clean-arch/internal/infra/grpc/pb"
 	"github.com/mvr-garcia/go-clean-arch/internal/infra/grpc/service"
 	"github.com/mvr-garcia/go-clean-arch/internal/infra/web/webserver"
+	"github.com/mvr-garcia/go-clean-arch/internal/usecase"
 	"github.com/mvr-garcia/go-clean-arch/pkg/events"
 	"github.com/streadway/amqp"
 	"google.golang.org/grpc"
@@ -43,6 +45,7 @@ func main() {
 	})
 
 	createOrderUseCase := NewCreateOrderUseCase(db, eventDispatcher)
+	listOrdersUseCase := usecase.NewListOrdersUseCase(database.NewOrderRepository(db))
 
 	webserver := webserver.NewWebServer(configs.WebServerPort)
 	webOrderHandler := NewWebOrderHandler(db, eventDispatcher)
