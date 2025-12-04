@@ -16,3 +16,10 @@ clean:
 # Generate GraphQL files
 generate-graphql:
 	go run github.com/99designs/gqlgen generate -v
+
+# Generate Wire dependency injection
+generate-wire:
+	@echo "Generating Wire files..."
+	cd cmd/ordersystem && wire
+	@echo "Wire generation completed!"
+
