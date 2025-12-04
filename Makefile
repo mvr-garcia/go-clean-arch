@@ -3,15 +3,11 @@ OUT_DIR=internal/infra/grpc/pb/
 
 # Generate Go files from proto definitions
 generate-grpc:
-	@echo "Generating Protocol Buffer files..."
 	protoc --go_out=. --go-grpc_out=. internal/infra/grpc/protofiles/*.proto
-	@echo "Generation completed!"
 
 # Clean generated Protocol Buffer files
 clean:
-	@echo "Cleaning generated files..."
 	rm -f internal/infra/grpc/pb/*.pb.go
-	@echo "Clean completed!"
 
 # Generate GraphQL files
 generate-graphql:
@@ -19,7 +15,8 @@ generate-graphql:
 
 # Generate Wire dependency injection
 generate-wire:
-	@echo "Generating Wire files..."
 	cd cmd/ordersystem && wire
-	@echo "Wire generation completed!"
 
+# Run the application
+run:
+	go run cmd/ordersystem/main.go cmd/ordersystem/wire_gen.go
