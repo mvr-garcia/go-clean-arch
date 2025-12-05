@@ -1,6 +1,8 @@
 package usecase
 
-import "github.com/mvr-garcia/go-clean-arch/internal/entity"
+import (
+	"github.com/mvr-garcia/go-clean-arch/internal/entity"
+)
 
 type ListOrdersOutputDTO struct {
 	Orders []OrderOutputDTO `json:"orders"`

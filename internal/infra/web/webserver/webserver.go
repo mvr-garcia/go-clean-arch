@@ -13,8 +13,10 @@ type WebServer struct {
 }
 
 func NewWebServer(serverPort string) *WebServer {
+	router := chi.NewRouter()
+	router.Use(middleware.Logger)
 	return &WebServer{
-		Router:        chi.NewRouter(),
+		Router:        router,
 		WebServerPort: serverPort,
 	}
 }
@@ -23,10 +25,7 @@ func (s *WebServer) AddHandler(method, path string, handler http.HandlerFunc) {
 	s.Router.Method(method, path, handler)
 }
 
-// loop through the handlers and add them to the router
-// register middeleware logger
 // start the server
 func (s *WebServer) Start() {
-	s.Router.Use(middleware.Logger)
 	http.ListenAndServe(s.WebServerPort, s.Router)
 }

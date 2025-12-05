@@ -5,10 +5,6 @@ OUT_DIR=internal/infra/grpc/pb/
 generate-grpc:
 	protoc --go_out=. --go-grpc_out=. internal/infra/grpc/protofiles/*.proto
 
-# Clean generated Protocol Buffer files
-clean:
-	rm -f internal/infra/grpc/pb/*.pb.go
-
 # Generate GraphQL files
 generate-graphql:
 	go run github.com/99designs/gqlgen generate -v
@@ -20,3 +16,12 @@ generate-wire:
 # Run the application
 run:
 	go run cmd/ordersystem/main.go cmd/ordersystem/wire_gen.go
+
+up:
+	@echo "Starting containers..."
+	docker compose up -d
+
+# Stop containers
+down:
+	@echo "Stopping containers..."
+	docker-compose down

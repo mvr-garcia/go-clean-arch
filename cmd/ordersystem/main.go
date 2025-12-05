@@ -8,6 +8,7 @@ import (
 
 	graphql_handler "github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/golang-migrate/migrate/v4"
 	"github.com/mvr-garcia/go-clean-arch/configs"
 	"github.com/mvr-garcia/go-clean-arch/internal/event/handler"
 	"github.com/mvr-garcia/go-clean-arch/internal/infra/graph"
@@ -21,6 +22,10 @@ import (
 
 	// mysql
 	_ "github.com/go-sql-driver/mysql"
+
+	// migrate mysql driver
+	_ "github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 func main() {
@@ -29,11 +34,25 @@ func main() {
 		panic(err)
 	}
 
-	db, err := sql.Open(configs.DBDriver, fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", configs.DBUser, configs.DBPassword, configs.DBHost, configs.DBPort, configs.DBName))
+	DSN := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", configs.DBUser, configs.DBPassword, configs.DBHost, configs.DBPort, configs.DBName)
+	db, err := sql.Open(configs.DBDriver, DSN)
 	if err != nil {
 		panic(err)
 	}
 	defer db.Close()
+
+	migrator, err := migrate.New(
+		"file://internal/infra/database/migrations",
+		configs.DBDriver+"://"+DSN,
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	// run migrations
+	if err := migrator.Up(); err != nil && err != migrate.ErrNoChange {
+		panic(err)
+	}
 
 	rabbitMQChannel := getRabbitMQChannel()
 
@@ -64,9 +83,16 @@ func main() {
 	}
 	go grpcServer.Serve(lis)
 
-	srv := graphql_handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
-		CreateOrderUseCase: *createOrderUseCase,
-	}}))
+	srv := graphql_handler.NewDefaultServer(
+		graph.NewExecutableSchema(
+			graph.Config{
+				Resolvers: &graph.Resolver{
+					CreateOrderUseCase: *createOrderUseCase,
+					ListOrdersUseCase:  *listOrdersUseCase,
+				},
+			},
+		),
+	)
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
 

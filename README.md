@@ -16,10 +16,7 @@ This project implements Clean Architecture with the following layers:
 ## Prerequisites
 
 - Go 1.21+
-- MySQL
-- RabbitMQ
-- Protocol Buffers compiler (protoc)
-- Docker & Docker Compose (optional)
+- Docker & Docker Compose
 
 ## Setup
 
@@ -28,14 +25,7 @@ This project implements Clean Architecture with the following layers:
 go mod download
 ```
 
-2. **Install development tools:**
-```bash
-go install github.com/google/wire/cmd/wire@latest
-go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-```
-
-3. **Configure environment:**
+2. **Configure environment:**
 
 Create a `.env` file in the project root:
 ```env
@@ -50,29 +40,17 @@ GRPC_SERVER_PORT=50051
 GRAPHQL_SERVER_PORT=8080
 ```
 
-4. **Start infrastructure (MySQL & RabbitMQ):**
-```bash
-docker-compose up -d
-```
-
-5. **Generate code:**
-```bash
-make generate-all
-```
-
-6. **Run the application:**
+3. **Run the application:**
 ```bash
 make run
 ```
 
-## Makefile Commands
+This command will automatically start the required infrastructure (MySQL & RabbitMQ) and run the application.
 
-- `make generate-grpc` - Generate Protocol Buffer files
-- `make generate-graphql` - Generate GraphQL files
-- `make generate-wire` - Generate Wire dependency injection
-- `make generate-all` - Generate all files (gRPC, GraphQL, Wire)
-- `make run` - Run the application
-- `make clean` - Clean generated files
+## Available Commands
+
+- `make run` - Start infrastructure and run the application
+- `make down` - Stop all containers
 
 ## API Examples
 
@@ -210,9 +188,9 @@ func main() {
 #### Create Order (Mutation)
 
 ```graphql
-mutation {
+mutation createMutation {
   createOrder(input: {
-    id: "order-003"
+    id: "order-005"
     Price: 350.00
     Tax: 35.00
   }) {
@@ -241,7 +219,7 @@ mutation {
 #### List Orders (Query)
 
 ```graphql
-query {
+query listOrders {
   listOrders {
     id
     Price
@@ -343,6 +321,27 @@ go test -cover ./...
 ## Events
 
 The system publishes an `OrderCreated` event to RabbitMQ whenever a new order is created. This allows for asynchronous processing and integration with other services.
+
+## Development
+
+### Prerequisites for Development
+
+- Protocol Buffers compiler (protoc)
+- Development tools:
+
+```bash
+go install github.com/google/wire/cmd/wire@latest
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+```
+
+### Code Generation
+
+> **Note:** Only run these commands if you modify the specifications (proto files, GraphQL schemas, or Wire configuration).
+
+- `make generate-grpc` - Generate Protocol Buffer files from `.proto` files
+- `make generate-graphql` - Generate GraphQL code from schema
+- `make generate-wire` - Generate Wire dependency injection code
 
 ## License
 
