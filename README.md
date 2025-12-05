@@ -15,8 +15,8 @@ This project implements Clean Architecture with the following layers:
 
 ## Prerequisites
 
-- Go 1.21+
-- Docker & Docker Compose
+- Go 1.24+
+- Docker
 
 ## Setup
 
